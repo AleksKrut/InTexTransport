@@ -18,7 +18,7 @@ async function mockApi(page: Page, administrator = true, firstStart = false) {
     if (path === '/api/session') {
       if (method === 'POST') { signedIn = true; return respond(admin); }
       if (method === 'DELETE') { signedIn = false; return route.fulfill({ status: 204 }); }
-      return signedIn ? respond(admin) : respond({}, 401);
+      return signedIn ? respond(admin) : respond({}, 404);
     }
     if (path === '/api/users' && method === 'POST' && isNew) {
       isNew = false; return respond(admin);

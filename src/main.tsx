@@ -167,7 +167,11 @@ function App() {
       setConfig(await response.json());
       setServer(await api<Server>('/server'));
       try { setUser(await api<User>('/session')); }
-      catch (e) { if (!(e instanceof ApiError && e.status === 401)) throw e; }
+      catch (e) {
+        // Traccar returns 404 for GET /session when no user is signed in.
+        if (e instanceof ApiError && (e.status === 401 || e.status === 404)) setUser(null);
+        else throw e;
+      }
     } catch (e) { setError(errorMessage(e)); } finally { setLoading(false); }
   }
   useEffect(() => { void boot(); }, []);
