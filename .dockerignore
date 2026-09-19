@@ -1,0 +1,11 @@
+.git
+.env
+.env.*
+node_modules
+dist
+backups
+.local
+tests
+docs
+*.log
+compose.override.yaml

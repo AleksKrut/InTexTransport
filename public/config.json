@@ -1,0 +1,10 @@
+{
+  "title": "ИнТехТранспорт",
+  "tileUrl": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+  "tileAttribution": "© OpenStreetMap contributors",
+  "center": [
+    60.5975,
+    56.8389
+  ],
+  "zoom": 11
+}

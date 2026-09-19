@@ -1,0 +1,13 @@
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+backups/
+*.log
+playwright-report/
+test-results/
+.local/
+__pycache__/
+*.pyc
+compose.override.yaml
