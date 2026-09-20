@@ -52,7 +52,6 @@ function Dashboard({ user, config, server, onLogout, onBack }: { user: User; con
   const [devices, setDevices] = useState<Device[]>([]), [positions, setPositions] = useState<Position[]>([]);
   const [selected, setSelected] = useState<number | null>(null), [search, setSearch] = useState('');
   const [error, setError] = useState(''), [lastRefresh, setLastRefresh] = useState<string>();
-  const [adding, setAdding] = useState(false), [saving, setSaving] = useState(false);
   const [route, setRoute] = useState<Position[] | null>(null), [routeBusy, setRouteBusy] = useState(false);
   const [routeMessage, setRouteMessage] = useState('');
   const routeRequest = useRef(0);
@@ -84,16 +83,6 @@ function Dashboard({ user, config, server, onLogout, onBack }: { user: User; con
   async function logout() {
     try { await api('/session', { method: 'DELETE' }); onLogout(); } catch (e) { handleError(e); }
   }
-  async function addDevice(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault(); setSaving(true); setError('');
-    const data = new FormData(event.currentTarget);
-    try {
-      const device = await api<Device>('/devices', json({
-        name: String(data.get('name')).trim(), uniqueId: String(data.get('uniqueId')).trim(),
-      }));
-      setAdding(false); select(device.id); await refresh();
-    } catch (e) { handleError(e); } finally { setSaving(false); }
-  }
   async function loadRoute(event: FormEvent) {
     event.preventDefault(); setError('');
     const requestId = ++routeRequest.current;
@@ -108,20 +97,13 @@ function Dashboard({ user, config, server, onLogout, onBack }: { user: User; con
   }
   const visible = devices.filter(d => (d.name + ' ' + d.uniqueId).toLowerCase().includes(search.toLowerCase()));
   const online = devices.filter(d => d.status === 'online').length;
-  const canAdd = user.administrator && !user.readonly && !user.deviceReadonly && !server.readonly && !server.deviceReadonly;
   return <div className="app">
     <header className="topbar"><div className="brand"><span className="brand-icon">↗</span>{config.title}<span className="local-tag">LOCAL</span></div>
       <div className="account"><span>{user.name}</span>{user.administrator && <button className="ghost" onClick={onBack}>Разделы</button>}<button className="ghost" onClick={logout}>Выйти</button></div></header>
     <div className="workspace"><aside className="sidebar">
       <div className="section-heading"><div><p className="eyebrow">ДИСПЕТЧЕРСКАЯ</p><h1>Транспорт <span>{devices.length}</span></h1></div>
-        {canAdd && <button className="icon-button" onClick={() => setAdding(!adding)} aria-label="Добавить транспорт">+</button>}</div>
+      </div>
       <div className="stats"><div><strong>{online}</strong><span>На связи</span></div><div><strong>{devices.length - online}</strong><span>Ожидание / нет связи</span></div></div>
-      {adding && <form className="add-form" onSubmit={addDevice}>
-        <h3>Новый транспорт</h3>
-        <label>Название<input name="name" placeholder="Газель · А123ВС" required maxLength={100} /></label>
-        <label>IMEI / идентификатор<input name="uniqueId" placeholder="Точно как в настройках трекера" pattern=".*\S.*" required maxLength={128} /></label>
-        <button className="primary" disabled={saving}>{saving ? 'Сохранение…' : 'Добавить'}</button>
-      </form>}
       <label className="search"><span className="sr-only">Поиск транспорта</span><input placeholder="Название или IMEI" value={search} onChange={e => setSearch(e.target.value)} /></label>
       <div className="device-list">{visible.map(device => {
         const point = positions.find(p => p.deviceId === device.id);
@@ -131,7 +113,7 @@ function Dashboard({ user, config, server, onLogout, onBack }: { user: User; con
           <div className="device-line"><span>{statusLabel(device.status)}</span><span>{point ? speedKmh(point.speed) ?? '—' : '—'} км/ч</span></div>
         </button>;
       })}
-      {!visible.length && <div className="empty"><strong>{devices.length ? 'Ничего не найдено' : 'Добавьте первый транспорт'}</strong><p>{devices.length ? 'Измените поисковый запрос.' : 'Укажите название и идентификатор, затем направьте трекер на этот сервер.'}</p></div>}</div>
+      {!visible.length && <div className="empty"><strong>{devices.length ? 'Ничего не найдено' : 'Нет доступного транспорта'}</strong><p>{devices.length ? 'Измените поисковый запрос.' : user.administrator ? 'Добавьте транспорт в разделе «Менеджер» → «Транспорт».' : 'Обратитесь к менеджеру, чтобы получить доступ к объектам.'}</p></div>}</div>
       <footer className="sidebar-footer">Обновление каждые 5 секунд<br />Последнее: {formatTime(lastRefresh)}</footer>
     </aside><main className="main">
       {error && <div className="error banner" role="alert">{error} Последние загруженные данные могут быть устаревшими.</div>}

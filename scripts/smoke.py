@@ -87,6 +87,40 @@ request("/session", urllib.parse.urlencode({"email": customer_email, "password":
 visible = request("/devices?all=true", opener=customer_client)
 assert [item["id"] for item in visible] == [device["id"]], visible
 assert len(request("/positions?" + query, opener=customer_client)) == 3
+# Manager UI stores vehicle metadata without replacing other device settings.
+device["model"] = "NAVTELECOM test model"
+device["phone"] = "+70000000000"
+device["attributes"] = {**device.get("attributes", {}), "intehPlate": "TEST001", "intehProtocol": "EGTS"}
+request("/devices/" + str(device["id"]), device, method="PUT")
+saved_device = next(item for item in request("/devices?all=true") if item["id"] == device["id"])
+assert saved_device["attributes"]["intehPlate"] == "TEST001"
+assert saved_device["model"] == "NAVTELECOM test model"
+# A client label must never confer access without an explicit server permission.
+observer = request("/users", {
+    "name": "CI observer", "email": "observer@example.invalid", "password": password,
+    "administrator": False, "readonly": True, "deviceReadonly": True,
+    "userLimit": 0, "deviceLimit": 0, "limitCommands": True, "fixedEmail": True,
+    "attributes": {"intehAccountType": "observer", "intehClientId": customer["id"]},
+})
+observer_client = urllib.request.build_opener(
+    urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+request("/session", urllib.parse.urlencode({"email": observer["email"], "password": password}), opener=observer_client)
+assert request("/devices?all=true", opener=observer_client) == []
+request("/permissions", {"userId": observer["id"], "deviceId": device["id"]})
+assert [item["id"] for item in request("/devices?all=true", opener=observer_client)] == [device["id"]]
+# The explicitly labelled system manager has actual server administrator rights.
+manager = request("/users", {
+    "name": "CI manager", "email": "manager@example.invalid", "password": password,
+    "administrator": True, "readonly": False, "deviceReadonly": False,
+    "userLimit": -1, "deviceLimit": -1, "limitCommands": False, "fixedEmail": False,
+    "attributes": {"intehAccountType": "manager"},
+})
+manager_client = urllib.request.build_opener(
+    urllib.request.HTTPCookieProcessor(http.cookiejar.CookieJar()))
+manager_session = request("/session", urllib.parse.urlencode({"email": manager["email"], "password": password}), opener=manager_client)
+assert manager_session["administrator"]
+assert {item["id"] for item in request("/devices?all=true", opener=manager_client)} == {device["id"], hidden["id"]}
+assert any(item["id"] == customer["id"] for item in request("/users", opener=manager_client))
 for path, body in [
     ("/positions?deviceId=" + str(hidden["id"]), None),
     ("/users?userId=" + str(admin["id"]), None),
