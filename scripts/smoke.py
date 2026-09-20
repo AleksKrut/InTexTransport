@@ -91,10 +91,12 @@ assert len(request("/positions?" + query, opener=customer_client)) == 3
 device["model"] = "NAVTELECOM test model"
 device["phone"] = "+70000000000"
 device["attributes"] = {**device.get("attributes", {}), "intehPlate": "TEST001", "intehProtocol": "EGTS"}
+device["attributes"]["intehSensors"] = json.dumps([{"id": "fuel", "name": "Fuel", "parameter": "adc1", "kind": "fuel", "unit": "L", "factor": 1, "offset": 0, "calibration": "0;0\n1000;100", "enabled": True}])
 request("/devices/" + str(device["id"]), device, method="PUT")
 saved_device = next(item for item in request("/devices?all=true") if item["id"] == device["id"])
 assert saved_device["attributes"]["intehPlate"] == "TEST001"
 assert saved_device["model"] == "NAVTELECOM test model"
+assert json.loads(saved_device["attributes"]["intehSensors"])[0]["parameter"] == "adc1"
 # A client label must never confer access without an explicit server permission.
 observer = request("/users", {
     "name": "CI observer", "email": "observer@example.invalid", "password": password,

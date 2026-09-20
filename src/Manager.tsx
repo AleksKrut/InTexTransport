@@ -1,3 +1,5 @@
+import { VehicleFields } from './VehicleFields';
+import { calibrationPoints, sensorsFrom } from './sensors';
 import { useCallback, useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react';
 import { api, ApiError, json } from './api';
 import { accountKind, accountPermissions, clientIdOf, roleLabel } from './management';
@@ -85,9 +87,17 @@ export function Manager({ user, onBack, onLogout }: { user: User; onBack: () => 
     try {
       if (editor.type === 'vehicle') {
         const current = editor.item;
+        const sensors = sensorsFrom(field(data, 'sensors'));
+        if (sensors.length > 64) throw new Error('Не более 64 датчиков на объект.');
+        for (const sensor of sensors) {
+          if (!sensor.name.trim() || !sensor.parameter.trim()) throw new Error('У каждого датчика заполните название и параметр.');
+          if (!Number.isFinite(sensor.factor) || !Number.isFinite(sensor.offset)) throw new Error('Коэффициент и смещение должны быть числами.');
+          calibrationPoints(sensor.calibration);
+        }
+        const extra = Object.fromEntries(['manufacturer', 'vehicleType', 'department', 'sim2', 'firmware', 'vin', 'vehicleModel', 'notes'].map(key => ['inteh' + key[0].toUpperCase() + key.slice(1), field(data, key)]));
         const payload = { ...(current ?? {}), name: field(data, 'name'), uniqueId: field(data, 'uniqueId'),
           model: field(data, 'model'), phone: field(data, 'phone'),
-          attributes: { ...(current?.attributes ?? {}), intehPlate: field(data, 'plate'), intehProtocol: field(data, 'protocol') } };
+          attributes: { ...(current?.attributes ?? {}), intehPlate: field(data, 'plate'), intehProtocol: field(data, 'protocol'), ...extra, intehSensors: JSON.stringify(sensors) } };
         if (!payload.name || !payload.uniqueId) throw new Error('Заполните название и идентификатор терминала.');
         const device = await api<Device>(current ? '/devices/' + current.id : '/devices', { ...json(payload), method: current ? 'PUT' : 'POST' });
         saved = true; setEditor(null); setSelected(device.id);
@@ -235,13 +245,7 @@ export function Manager({ user, onBack, onLogout }: { user: User; onBack: () => 
           <label className="full-width">{editor.type === 'client' ? 'Название клиента / компании' : editor.type === 'user' ? 'Имя пользователя' : 'Название транспорта'}
             <input name="name" required maxLength={100} defaultValue={editor.item?.name} autoFocus /></label>
           {editor.type === 'vehicle' ? <>
-            <label>Госномер<input name="plate" defaultValue={String(editorDevice?.attributes?.intehPlate ?? '')} maxLength={30} /></label>
-            <label>IMEI / ID терминала<input name="uniqueId" required maxLength={128} defaultValue={editorDevice?.uniqueId} /></label>
-            <label>Модель терминала<input name="model" placeholder="Например, NAVTELECOM SMART…" defaultValue={editorDevice?.model} maxLength={100} /></label>
-            <label>SIM / телефон терминала<input name="phone" defaultValue={editorDevice?.phone} maxLength={40} /></label>
-            <label>Протокол терминала<select name="protocol" defaultValue={String(editorDevice?.attributes?.intehProtocol ?? '')}>
-              <option value="">Выбрать позже</option><option value="EGTS">EGTS</option><option value="FLEX / NAVTELECOM">FLEX / NAVTELECOM</option><option value="Teltonika">Teltonika</option><option value="Wialon IPS">Wialon IPS</option><option value="OsmAnd">OsmAnd</option><option value="Другой">Другой</option>
-            </select></label>
+            <VehicleFields device={editorDevice} />
             {!editorDevice && <label>Клиент — назначить доступ<select name="clientId" defaultValue={clientFilter ?? ''}><option value="">Без назначения</option>{clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}</select></label>}
           </> : <>
             {editor.type === 'client' && <><label>ИНН<input name="inn" inputMode="numeric" pattern="([0-9]{10}|[0-9]{12})?" title="10 или 12 цифр" defaultValue={String(editorUser?.attributes?.intehInn ?? '')} /></label>

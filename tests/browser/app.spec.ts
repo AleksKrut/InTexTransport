@@ -83,7 +83,7 @@ test('manager creates and edits client and assigns vehicle in manager', async ({
   await modal.getByLabel('Госномер', { exact: true }).fill('А001АА');
   await modal.getByLabel('IMEI / ID терминала').fill('860000000000001');
   await modal.getByLabel('Модель терминала').fill('NAVTELECOM SMART');
-  await modal.getByLabel('Протокол терминала').selectOption('EGTS');
+  await modal.getByLabel('Протокол терминала').selectOption('egts');
   await modal.getByLabel('Клиент — назначить доступ').selectOption({ label: 'ООО Север' });
   await modal.getByRole('button', { name: 'Сохранить', exact: true }).click();
   await expect(modal).toHaveCount(0);
@@ -155,22 +155,20 @@ test('partial assignment failure does not ask user to create the vehicle again',
 test('customer directly enters read-only monitoring even on reload', async ({ page }) => {
   await mockApi(page, false); await login(page);
   await expect(page.getByRole('heading', { name: 'Выберите рабочий раздел' })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Разделы', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Открыть менеджер', exact: true })).toHaveCount(0);
   await expect(page.getByRole('button', { name: /Газель А123ВС/ }).first()).toBeVisible();
   await expect(page.getByRole('button', { name: 'Добавить транспорт' })).toHaveCount(0);
   await page.reload();
   await expect(page.getByRole('button', { name: /Газель А123ВС/ }).first()).toBeVisible();
-  await expect(page.getByRole('button', { name: 'Разделы', exact: true })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Открыть менеджер', exact: true })).toHaveCount(0);
   await page.getByRole('button', { name: 'Выйти', exact: true }).click();
   await expect(page.getByRole('heading', { name: 'Вход в систему' })).toBeVisible();
 });
 
 test('administrator monitoring also has no creation controls', async ({ page }) => {
   await mockApi(page); await login(page);
-  await page.getByRole('button', { name: /Открыть мониторинг/ }).click();
   await expect(page.getByRole('button', { name: /Газель А123ВС/ }).first()).toBeVisible();
   await expect(page.getByRole('button', { name: 'Добавить транспорт' })).toHaveCount(0);
-  await page.getByRole('button', { name: 'Разделы', exact: true }).click();
   await expect(page.getByRole('button', { name: /Открыть менеджер/ })).toBeVisible();
 });
 
@@ -180,5 +178,48 @@ test('first start creates administrator before section choice', async ({ page })
   await page.getByLabel('Email', { exact: true }).fill('admin@example.test');
   await page.getByLabel('Пароль', { exact: true }).fill('owner-password-123');
   await page.getByRole('button', { name: 'Создать и войти' }).click();
-  await expect(page.getByRole('heading', { name: 'Выберите рабочий раздел' })).toBeVisible();
+  await expect(page.getByRole('button', { name: /Открыть менеджер/ })).toBeVisible();
+});
+
+
+test('terminal catalog, sensor calibration and saved readings work together', async ({ page }) => {
+  await mockApi(page);
+  await page.route('**/connection.json', route => route.fulfill({ json: { configured: true, host: 'gps.example.test', localHost: '192.168.1.50', protocols: ['navis'] } }));
+  await page.route('**/api/positions', route => route.fulfill({ json: [{ id: 1, deviceId: 1, attributes: { adc1: 500 }, fixTime: '2026-09-20T10:00:00Z' }] }));
+  await openManager(page); await switchTab(page, 'Транспорт');
+  await page.getByRole('button', { name: 'Выбрать Газель А123ВС', exact: true }).click();
+  await page.getByRole('button', { name: 'Редактировать', exact: true }).click();
+  const modal = page.getByRole('dialog');
+  await modal.getByLabel('Производитель', { exact: true }).selectOption('Навтелеком');
+  await modal.getByLabel('Модель терминала', { exact: true }).fill('Smart S-2410');
+  await expect(modal.getByLabel('Протокол терминала')).toHaveValue('navis');
+  await expect(modal).toContainText('5019 / TCP');
+  await expect(modal).toContainText('gps.example.test');
+  await modal.getByLabel('SIM 2', { exact: true }).fill('+79000000002');
+  await page.screenshot({ path: 'test-results/terminal-card.png', fullPage: true });
+  await modal.getByRole('tab', { name: /Датчики/ }).click();
+  await modal.getByRole('button', { name: /Добавить датчик/ }).click();
+  await modal.getByLabel('Название датчика').fill('Топливо в баке');
+  await modal.getByLabel('Параметр', { exact: true }).fill('adc1');
+  await modal.getByLabel('Вид', { exact: true }).selectOption('fuel');
+  await modal.getByLabel('Единица измерения').fill('л');
+  await modal.getByLabel(/Тарировка:/).fill('0;0\n1000;100');
+  await expect(modal).toContainText('Последнее значение: 50 л');
+  await page.screenshot({ path: 'test-results/sensors-card.png', fullPage: true });
+  await modal.getByRole('button', { name: 'Сохранить', exact: true }).click();
+  await expect(modal).toHaveCount(0);
+  await page.reload();
+  await page.getByRole('button', { name: /Газель А123ВС/ }).first().click();
+  await expect(page.getByText('Топливо в баке', { exact: true })).toBeVisible();
+  await expect(page.getByText('50 л', { exact: true })).toBeVisible();
+  await page.getByRole('button', { name: /Открыть менеджер/ }).click();
+  await switchTab(page, 'Транспорт');
+  await page.getByRole('button', { name: 'Выбрать Газель А123ВС', exact: true }).click();
+  await page.getByRole('button', { name: 'Редактировать', exact: true }).click();
+  await expect(modal.getByLabel('SIM 2', { exact: true })).toHaveValue('+79000000002');
+  await modal.getByRole('tab', { name: /Датчики/ }).click();
+  await expect(modal.getByLabel('Название датчика')).toHaveValue('Топливо в баке');
+  await modal.getByLabel(/Тарировка:/).fill('0;0\n0;100');
+  await modal.getByRole('button', { name: 'Сохранить', exact: true }).click();
+  await expect(modal.getByRole('alert')).toContainText('строго возрастают');
 });

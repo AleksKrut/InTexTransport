@@ -1,0 +1,948 @@
+{
+  "version": 1,
+  "checkedAt": "2026-09-20",
+  "serverVersion": "6.15.3",
+  "source": "https://www.traccar.org/devices/",
+  "protocols": [
+    {
+      "id": "osmand",
+      "label": "OsmAnd",
+      "port": 5055,
+      "transport": "tcp"
+    },
+    {
+      "id": "teltonika",
+      "label": "Teltonika",
+      "port": 5027,
+      "transport": "tcp"
+    },
+    {
+      "id": "wialon",
+      "label": "Wialon IPS",
+      "port": 5039,
+      "transport": "tcp"
+    },
+    {
+      "id": "egts",
+      "label": "EGTS",
+      "port": 5162,
+      "transport": "tcp"
+    },
+    {
+      "id": "navis",
+      "label": "Навтелеком / NAVIS",
+      "port": 5019,
+      "transport": "tcp"
+    },
+    {
+      "id": "galileo",
+      "label": "Galileosky",
+      "port": 5034,
+      "transport": "tcp"
+    },
+    {
+      "id": "adm",
+      "label": "Неоматика",
+      "port": 5092,
+      "transport": "tcp"
+    },
+    {
+      "id": "arnavi",
+      "label": "Аруснави",
+      "port": 5100,
+      "transport": "tcp"
+    }
+  ],
+  "models": [
+    {
+      "name": "Signal S-2115",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Signal S-2117",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Navis CH-4713",
+      "manufacturer": "NAVIS",
+      "protocol": "navis"
+    },
+    {
+      "name": "Navis CH-5703",
+      "manufacturer": "NAVIS",
+      "protocol": "navis"
+    },
+    {
+      "name": "Start S-2010",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Start S-2011",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Start S-2012",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Start S-2013",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Smart S-2410",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Smart S-2411",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Smart S-2412",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Smart S-2413",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Smart S-2420",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Smart S-2421",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Smart S-2422",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Smart S-2423",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Smart S-2425",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Smart S-2433",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Smart S-2435",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Smart S-2333A",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Smart S-4533",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Smart S-4535",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Smart S-4537",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Signal S-2613",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Signal S-2651",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Signal S-2652",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Signal S-2653",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Signal S-2654",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Signal S-4651",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Signal S-4751",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Signal S-4753",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Smart S-2437",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Signal S-4752",
+      "manufacturer": "Навтелеком",
+      "protocol": "navis"
+    },
+    {
+      "name": "Teltonika FMB965",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMC920",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMM920",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMC003",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMM003",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB150",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMC150",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMM150",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM1100",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM1110",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM1010",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM1120",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM1202",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM2100",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM2200",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM3001",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM3200",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM3612",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM36M1",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM4100",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM4200",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM5300",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM6320",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika GH3000",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM3300",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika CT2000E",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM1204",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM3622",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB900",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB920",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMT100",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB001",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB002",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB010",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB020",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB110",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB120",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB122",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB125",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMA110",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMA120",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB202",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB204",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMA202",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMA204",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB630",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB640",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB962",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB964",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika TMT250",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMC001",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMM001",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMC125",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMC130",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMC640",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMM125",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMM130",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMM640",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FM6300",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMU125",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMU126",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMU130",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB130",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB140",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika MSP500",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB003",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika MTB100",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB208",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Damoov Telematics SDK",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika TRB245",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika TRB255",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika RUT955",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika RUT956",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika RUTX09",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika RUTX11",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika RUTX12",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika RUTX14",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika RUTX50",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika Bitrek Series",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika TAT100",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika TAT140",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika GH-5200",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FCM650",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMC650",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMC230",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMC234",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMC225",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMM230",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMM225",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB209",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "Teltonika FMB230",
+      "manufacturer": "Teltonika",
+      "protocol": "teltonika"
+    },
+    {
+      "name": "GalileoSky 2.5",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky 4.0",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky 5.0",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky 5.1",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky 7.0",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky 7.0 Lite",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky Base Block",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky Base Block Lite",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky Base Block Optimum",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky Base Block Wi-Fi",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky Base Block Wi-Fi Hub",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky Base Block Iridium",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky Boxfinder",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "Galileosky OBD-II",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky 7x",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky 7x C",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky 7x Plus",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky 7x LTE Cat M1",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky 7x LTE Cat 1",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky 7x Wi-Fi Hub",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky 7.0 Wi-Fi",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky 10",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky 10 Plus",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky 10 C",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "GalileoSky 10 Hub",
+      "manufacturer": "Galileosky",
+      "protocol": "galileo"
+    },
+    {
+      "name": "Wialon IPS",
+      "manufacturer": "Wialon IPS",
+      "protocol": "wialon"
+    },
+    {
+      "name": "MasterKit",
+      "manufacturer": "Wialon IPS",
+      "protocol": "wialon"
+    },
+    {
+      "name": "MasterKit BM8009",
+      "manufacturer": "Wialon IPS",
+      "protocol": "wialon"
+    },
+    {
+      "name": "NeoTech TR_1000",
+      "manufacturer": "Wialon IPS",
+      "protocol": "wialon"
+    },
+    {
+      "name": "Eskort TD-Online",
+      "manufacturer": "Wialon IPS",
+      "protocol": "wialon"
+    },
+    {
+      "name": "Naviset GT-10",
+      "manufacturer": "Wialon IPS",
+      "protocol": "wialon"
+    },
+    {
+      "name": "Bitrek BI-868Q TREK",
+      "manufacturer": "Wialon IPS",
+      "protocol": "wialon"
+    },
+    {
+      "name": "OsmAnd",
+      "manufacturer": "OsmAnd",
+      "protocol": "osmand"
+    },
+    {
+      "name": "SendLocation",
+      "manufacturer": "OsmAnd",
+      "protocol": "osmand"
+    },
+    {
+      "name": "Locus Pro Android",
+      "manufacturer": "OsmAnd",
+      "protocol": "osmand"
+    },
+    {
+      "name": "Custodium",
+      "manufacturer": "OsmAnd",
+      "protocol": "osmand"
+    },
+    {
+      "name": "Traccar Client",
+      "manufacturer": "OsmAnd",
+      "protocol": "osmand"
+    },
+    {
+      "name": "Wikey Tracker 3.0",
+      "manufacturer": "OsmAnd",
+      "protocol": "osmand"
+    },
+    {
+      "name": "DigidownRDL",
+      "manufacturer": "OsmAnd",
+      "protocol": "osmand"
+    },
+    {
+      "name": "Neomatica ADM100",
+      "manufacturer": "Неоматика",
+      "protocol": "adm"
+    },
+    {
+      "name": "Neomatica ADM101",
+      "manufacturer": "Неоматика",
+      "protocol": "adm"
+    },
+    {
+      "name": "Neomatica ADM300",
+      "manufacturer": "Неоматика",
+      "protocol": "adm"
+    },
+    {
+      "name": "Neomatica ADM700",
+      "manufacturer": "Неоматика",
+      "protocol": "adm"
+    },
+    {
+      "name": "Neomatica ADM700 3G",
+      "manufacturer": "Неоматика",
+      "protocol": "adm"
+    },
+    {
+      "name": "Neomatica ADM703 3G",
+      "manufacturer": "Неоматика",
+      "protocol": "adm"
+    },
+    {
+      "name": "Neomatica ADM710",
+      "manufacturer": "Неоматика",
+      "protocol": "adm"
+    },
+    {
+      "name": "Neomatica ADM007",
+      "manufacturer": "Неоматика",
+      "protocol": "adm"
+    },
+    {
+      "name": "Neomatica ADM333",
+      "manufacturer": "Неоматика",
+      "protocol": "adm"
+    },
+    {
+      "name": "Neomatica ADM500",
+      "manufacturer": "Неоматика",
+      "protocol": "adm"
+    },
+    {
+      "name": "Neomatica ADM P50",
+      "manufacturer": "Неоматика",
+      "protocol": "adm"
+    },
+    {
+      "name": "Neomatica ADM P50 LTE",
+      "manufacturer": "Неоматика",
+      "protocol": "adm"
+    },
+    {
+      "name": "ARNAVI",
+      "manufacturer": "Аруснави",
+      "protocol": "arnavi"
+    },
+    {
+      "name": "EGTS (Era-Glonass)",
+      "manufacturer": "EGTS",
+      "protocol": "egts"
+    },
+    {
+      "name": "Smartphone with Traccar Client app or a custom app built with the Traccar Client SDK",
+      "manufacturer": "OsmAnd",
+      "protocol": "osmand"
+    }
+  ]
+}

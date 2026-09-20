@@ -21,6 +21,23 @@ def plan(**changes):
 
 
 class InstallerTests(unittest.TestCase):
+    def test_catalog_ports_and_public_connection_match_plan(self):
+        values = plan()
+        values["protocols"] = ["navis", "galileo", "adm", "arnavi"]
+        values["external"] = "gps.example.com"
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            wizard.write_override(root, values)
+            connection = json.loads((root / ".local/connection.json").read_text())
+            self.assertEqual(connection["host"], "gps.example.com")
+            self.assertEqual(connection["protocols"], values["protocols"])
+            self.assertTrue(connection["configured"])
+            config = (root / "compose.override.yaml").read_text()
+            for key in values["protocols"]:
+                self.assertIn(f'{wizard.PROTOCOLS[key][1]}/tcp', config)
+            wizard.write_override(root, values, bootstrap=True)
+            self.assertFalse(json.loads((root / ".local/connection.json").read_text())["configured"])
+
     def test_address_validation_rejects_urls_and_command_injection(self):
         for value in ("https://gps.example.com", "gps.example.com:5055", "x\ny",
                       "$(touch /tmp/a)", "0.0.0.0", "127.0.0.1", "999.1.1.1"):

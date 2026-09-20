@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react'
 import { createRoot } from 'react-dom/client';
 import { api, ApiError, json } from './api';
 import { FleetMap } from './Map';
+import { sensorsFrom, sensorValue } from './sensors';
 import { Manager } from './Manager';
 import { orderedRoute, routeQuery, speedKmh } from './domain.mjs';
 import type { Config, Device, Position, Server, User } from './types';
@@ -99,7 +100,7 @@ function Dashboard({ user, config, server, onLogout, onBack }: { user: User; con
   const online = devices.filter(d => d.status === 'online').length;
   return <div className="app">
     <header className="topbar"><div className="brand"><span className="brand-icon">↗</span>{config.title}<span className="local-tag">LOCAL</span></div>
-      <div className="account"><span>{user.name}</span>{user.administrator && <button className="ghost" onClick={onBack}>Разделы</button>}<button className="ghost" onClick={logout}>Выйти</button></div></header>
+      <div className="account"><span>{user.name}</span>{user.administrator && <button className="ghost" onClick={onBack}>Открыть менеджер</button>}<button className="ghost" onClick={logout}>Выйти</button></div></header>
     <div className="workspace"><aside className="sidebar">
       <div className="section-heading"><div><p className="eyebrow">ДИСПЕТЧЕРСКАЯ</p><h1>Транспорт <span>{devices.length}</span></h1></div>
       </div>
@@ -125,6 +126,7 @@ function Dashboard({ user, config, server, onLogout, onBack }: { user: User; con
             <div><span>Зажигание</span><strong>{position?.attributes.ignition === true ? 'Включено' : position?.attributes.ignition === false ? 'Выключено' : 'Нет данных'}</strong></div>
             <div><span>Время координат</span><strong>{formatTime(position?.fixTime)}</strong></div>
             <div><span>Последняя связь</span><strong>{formatTime(selectedDevice.lastUpdate)}</strong></div></div>
+          <div className="telemetry">{sensorsFrom(selectedDevice.attributes?.intehSensors).filter(s => s.enabled).map(s => <div key={s.id}><span>{s.name}</span><strong>{sensorValue(s, position?.attributes)}</strong></div>)}</div>
           <form className="route-form" onSubmit={loadRoute}><label>Начало периода<input type="datetime-local" required value={from} onChange={e => setFrom(e.target.value)} /></label>
             <label>Конец периода<input type="datetime-local" required value={to} onChange={e => setTo(e.target.value)} /></label>
             <button className="primary" disabled={routeBusy}>{routeBusy ? 'Загрузка…' : 'Показать маршрут'}</button>
@@ -160,18 +162,7 @@ function App() {
   if (loading) return <main className="loading">Подключаемся к серверу мониторинга…</main>;
   if (error || !config || !server) return <main className="loading"><h2>Нет соединения с сервером</h2><p>{error}</p><button className="primary" onClick={boot}>Повторить</button></main>;
   if (!user) return <Login server={server} onLogin={setUser} onCreated={() => setServer({ ...server, newServer: false })} />;
-  if (mode === 'manager' && user.administrator) return <Manager user={user} onBack={() => setMode(null)} onLogout={onLogout} />;
-  if (!user.administrator || mode === 'monitoring') return <Dashboard user={user} config={config} server={server} onLogout={onLogout} onBack={() => setMode(null)} />;
-  return <main className="mode-shell"><div className="mode-content">
-    <div className="brand"><span className="brand-icon">↗</span>{config.title}<span className="local-tag">LOCAL</span></div>
-    <p className="eyebrow">ДОБРО ПОЖАЛОВАТЬ, {user.name}</p><h1>Выберите рабочий раздел</h1>
-    <p className="muted">Наблюдайте за транспортом или управляйте доступом клиентов.</p>
-    <div className="mode-grid"><button className="mode-card" onClick={() => setMode('monitoring')}>
-      <span className="mode-symbol">↗</span><strong>Мониторинг</strong><span>Карта, транспорт, показания и история маршрутов.</span><b>Открыть мониторинг →</b>
-    </button>{user.administrator && <button className="mode-card" onClick={() => setMode('manager')}>
-      <span className="mode-symbol">☷</span><strong>Менеджер</strong><span>Клиенты, учётные записи и назначение транспорта.</span><b>Открыть менеджер →</b>
-    </button>}</div>
-    <button className="ghost" onClick={async () => { try { await api('/session', { method: 'DELETE' }); onLogout(); } catch (e) { setError(errorMessage(e)); } }}>Выйти из системы</button>
-  </div></main>;
+  if (mode === 'manager' && user.administrator) return <Manager user={user} onBack={() => setMode('monitoring')} onLogout={onLogout} />;
+  return <Dashboard user={user} config={config} server={server} onLogout={onLogout} onBack={() => setMode('manager')} />;
 }
 createRoot(document.getElementById('root')!).render(<App />);
