@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
-import { api } from './api';
-import type { Device, Position } from './types';
+import { useTelemetry } from './useTelemetry';
+import { describeParameter } from './telemetry';
+import type { Device } from './types';
 import { sensorsFrom, sensorValue, type Sensor } from './sensors';
 
 interface Catalog { protocols: { id: string; label: string; port: number; transport: string }[]; models: { name: string; manufacturer: string; protocol: string }[] }
@@ -17,15 +18,13 @@ export function VehicleFields({ device }: { device?: Device }) {
   const [protocol, setProtocol] = useState(legacy[oldProtocol] ?? oldProtocol);
   const [tab, setTab] = useState('terminal');
   const [sensors, setSensors] = useState<Sensor[]>(() => sensorsFrom(attrs.intehSensors));
-  const [position, setPosition] = useState<Position>();
+  const { position, parameters, status: liveStatus, error: liveError } = useTelemetry(device?.id);
   useEffect(() => {
     let active = true;
     Promise.all([fetch('/equipment.json').then(r => { if (!r.ok) throw Error(); return r.json(); }),
       fetch('/connection.json', { cache: 'no-store' }).then(r => { if (!r.ok) throw Error(); return r.json(); })])
       .then(([c, endpoint]) => { if (active) { setCatalog(c); setConnection(endpoint); } })
       .catch(() => { if (active) setMessage('Не удалось загрузить каталог или настройки подключения. Закройте карточку и повторите.'); });
-    if (device) api<Position[]>('/positions').then(rows => { if (active) setPosition(rows.find(p => p.deviceId === device.id)); })
-      .catch(() => { if (active) setMessage('Последние параметры не загружены. Настройки датчиков сохранены в карточке.'); });
     return () => { active = false; };
   }, [device?.id]);
   const chosen = catalog?.protocols.find(p => p.id === protocol);
@@ -40,23 +39,45 @@ export function VehicleFields({ device }: { device?: Device }) {
     <input type="hidden" name="sensors" value={JSON.stringify(sensors)} />
     <div className="full-width form-grid" hidden={tab !== 'terminal'}>
       <label>Производитель<select aria-label="Производитель" name="manufacturer" value={manufacturer} onChange={e => { setManufacturer(e.target.value); setModel(''); setProtocol(''); }}><option value="">Все / другая модель</option>{Array.from(new Set(catalog?.models.map(m => m.manufacturer))).map(m => <option key={m}>{m}</option>)}{manufacturer && !catalog?.models.some(m => m.manufacturer === manufacturer) && <option>{manufacturer}</option>}</select></label>
-      <label>Модель терминала<input name="model" list="terminal-models" value={model} maxLength={100} placeholder="Выберите или введите модель" onChange={e => { setModel(e.target.value); const entry = catalog?.models.find(m => m.name === e.target.value); if (entry) { setManufacturer(entry.manufacturer); setProtocol(entry.protocol); } }} /><datalist id="terminal-models">{catalog?.models.filter(m => !manufacturer || m.manufacturer === manufacturer).map(m => <option key={m.name + m.protocol} value={m.name} />)}</datalist></label>
+      <input type="hidden" name="model" value={model} />
+      <label>Модель терминала<select aria-label="Модель терминала" value={catalog?.models.some(m => m.name === model) ? model : model ? '__manual__' : ''} onChange={e => {
+        if (e.target.value === '__manual__') { setModel('Другая модель'); return; }
+        setModel(e.target.value);
+        const entry = catalog?.models.find(m => m.name === e.target.value);
+        if (entry) { setManufacturer(entry.manufacturer); setProtocol(entry.protocol); } else setProtocol('');
+      }}><option value="">Выберите модель</option>{catalog?.models.filter(m => !manufacturer || m.manufacturer === manufacturer).map(m => <option key={m.name + m.protocol} value={m.name}>{m.name}</option>)}<option value="__manual__">Другой терминал — указать вручную</option></select></label>
+      {model && !catalog?.models.some(m => m.name === model) && <label>Название другой модели<input value={model} maxLength={100} onChange={e => setModel(e.target.value)} /></label>}
       <label>Протокол терминала<select name="protocol" value={protocol} onChange={e => setProtocol(e.target.value)}><option value="">Выбрать позже</option>{catalog?.protocols.map(p => <option key={p.id} value={p.id}>{p.label}{p.id === 'navis' ? ' — NTCB / FLEX' : ''}</option>)}{protocol && !catalog?.protocols.some(p => p.id === protocol) && <option value={protocol}>{protocol}</option>}</select></label>
       <label>SIM / телефон терминала<input name="phone" defaultValue={device?.phone} maxLength={40} /></label>
       <label>SIM 2<input name="sim2" defaultValue={String(attrs.intehSim2 ?? '')} maxLength={40} /></label>
       <label>Версия прошивки<input name="firmware" defaultValue={String(attrs.intehFirmware ?? '')} maxLength={80} /></label>
       <div className="connection-card full-width"><strong>Подключение терминала</strong>
         <p>Адрес: <b>{connection?.host || 'Внешний адрес не задан в мастере установки'}</b></p>
-        <p>Порт: <b>{chosen ? `${chosen.port} / ${chosen.transport.toUpperCase()}` : 'Выберите протокол'}</b></p>
+        <p>Порт для этой модели: <b>{chosen ? `${chosen.port} / ${chosen.transport.toUpperCase()}` : 'Выберите протокол'}</b></p>
         <p>{enabled ? 'Порт настроен установщиком. Доступность из мобильной сети нужно проверить на сервере.' : 'Приёмник не настроен или его состояние неизвестно. Запустите мастер установки и выберите этот протокол.'}</p>
         {connection?.localHost && <p>Внутренний адрес: {connection.localHost} — для локального теста.</p>}
-        <small>Каталог указывает совместимость протокола, а не проверку всех функций модели. ID должен совпадать с передаваемым устройством. Для EGTS проверьте настроенный ID, он может отличаться от IMEI.</small>
+        <small>Эти адрес и порт нужно прописать в конфигураторе физического терминала. Каталог указывает совместимость протокола, а не проверку всех функций модели. ID должен совпадать с передаваемым устройством. Для EGTS проверьте настроенный ID, он может отличаться от IMEI.</small>
       </div>
     </div>
     <div className="full-width" hidden={tab !== 'sensors'}>
-      <p className="muted">Выберите параметр из последнего сообщения или введите его точное имя. Датчик физически подключается и настраивается через конфигуратор терминала.</p>
+      <section className="live-analysis" aria-label="Анализ входящих данных">
+        <h3>Входящие данные терминала</h3><p role="status">{liveStatus}</p>
+        <p>Последнее сообщение: {position ? new Date(position.serverTime || position.deviceTime || position.fixTime).toLocaleString('ru-RU') : 'Ещё нет'}{position?.protocol ? ` · Протокол: ${position.protocol}` : ''}</p>
+        {liveError && <p className="error" role="alert">{liveError} Показания могут быть устаревшими.</p>}
+        <p className="muted">Анализируются расшифрованные сервером параметры. Аналоговый вход сам по себе не определяет модель датчика или объём топлива. Подтвердите назначение и тарировку.</p>
+        <div className="parameter-table"><table><thead><tr><th>Параметр</th><th>Значение</th><th>Назначение</th><th>Последний приём</th><th>Датчик</th></tr></thead><tbody>
+          {parameters.map(p => { const hint = describeParameter(p.key, p.value); const exists = sensors.some(s => s.parameter === p.key); return <tr key={p.key}>
+            <td>{p.key}<small>{p.present ? 'В последнем сообщении' : 'Не пришёл в последнем сообщении'}</small></td>
+            <td>{typeof p.value === 'object' ? JSON.stringify(p.value) : String(p.value)}</td>
+            <td>{hint.name}<small>{hint.confidence}</small></td>
+            <td>{new Date(p.lastSeen).toLocaleString('ru-RU')}</td>
+            <td><button type="button" disabled={exists || sensors.length >= 64} onClick={() => setSensors(rows => [...rows, { id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, name: hint.name, parameter: p.key, kind: hint.kind, unit: hint.unit, factor: 1, offset: 0, calibration: '', enabled: true }])}>{exists ? 'Добавлен' : 'Создать датчик'}</button></td>
+          </tr>; })}
+        </tbody></table></div>
+        {!parameters.length && <p>Ожидаем параметры от терминала. Для нового объекта сначала сохраните карточку.</p>}
+      </section>
       <button type="button" onClick={() => setSensors(rows => [...rows, { id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, name: '', parameter: '', kind: 'number', unit: '', factor: 1, offset: 0, calibration: '', enabled: true }])}>+ Добавить датчик</button>
-      <datalist id="sensor-parameters">{Object.keys(position?.attributes ?? {}).map(key => <option key={key}>{key}</option>)}</datalist>
+      <datalist id="sensor-parameters">{parameters.map(({ key }) => <option key={key}>{key}</option>)}</datalist>
       {sensors.map((s, i) => <fieldset className="sensor-card" key={s.id}><legend>Датчик {i + 1}</legend><div className="form-grid">
         <label>Название датчика<input value={s.name} maxLength={100} onChange={e => patchSensor(s.id, { name: e.target.value })} /></label>
         <label>Параметр<input list="sensor-parameters" value={s.parameter} maxLength={100} onChange={e => patchSensor(s.id, { parameter: e.target.value })} /></label>

@@ -1,6 +1,7 @@
 import { expect, test, type Page } from '@playwright/test';
 
 async function mockApi(page: Page, administrator = true, firstStart = false, denyAssignment = false) {
+  await page.routeWebSocket('**/api/socket', () => {});
   let signedIn = false, isNew = firstStart, nextUser = 2, nextDevice = 2;
   const admin = { id: 1, name: 'Администратор', email: 'admin@example.test', administrator,
     readonly: !administrator, deviceReadonly: !administrator };
@@ -191,7 +192,7 @@ test('terminal catalog, sensor calibration and saved readings work together', as
   await page.getByRole('button', { name: 'Редактировать', exact: true }).click();
   const modal = page.getByRole('dialog');
   await modal.getByLabel('Производитель', { exact: true }).selectOption('Навтелеком');
-  await modal.getByLabel('Модель терминала', { exact: true }).fill('Smart S-2410');
+  await modal.getByLabel('Модель терминала', { exact: true }).selectOption('Smart S-2410');
   await expect(modal.getByLabel('Протокол терминала')).toHaveValue('navis');
   await expect(modal).toContainText('5019 / TCP');
   await expect(modal).toContainText('gps.example.test');
@@ -217,9 +218,43 @@ test('terminal catalog, sensor calibration and saved readings work together', as
   await page.getByRole('button', { name: 'Выбрать Газель А123ВС', exact: true }).click();
   await page.getByRole('button', { name: 'Редактировать', exact: true }).click();
   await expect(modal.getByLabel('SIM 2', { exact: true })).toHaveValue('+79000000002');
+  await expect(modal.getByLabel('Модель терминала', { exact: true })).toHaveValue('Smart S-2410');
+  await expect(modal.getByLabel('Протокол терминала')).toHaveValue('navis');
+  await expect(modal).toContainText('5019 / TCP');
   await modal.getByRole('tab', { name: /Датчики/ }).click();
   await expect(modal.getByLabel('Название датчика')).toHaveValue('Топливо в баке');
   await modal.getByLabel(/Тарировка:/).fill('0;0\n0;100');
   await modal.getByRole('button', { name: 'Сохранить', exact: true }).click();
   await expect(modal.getByRole('alert')).toContainText('строго возрастают');
+});
+
+
+test('live discovery handles new parameters and reconnects without replacing sensor edits', async ({ page }) => {
+  await mockApi(page);
+  const sockets: any[] = [];
+  await page.routeWebSocket('**/api/socket', socket => { sockets.push(socket); });
+  await openManager(page); await switchTab(page, 'Транспорт');
+  await page.getByRole('button', { name: 'Выбрать Газель А123ВС', exact: true }).click();
+  await page.getByRole('button', { name: 'Редактировать', exact: true }).click();
+  const modal = page.getByRole('dialog');
+  await modal.getByRole('tab', { name: /Датчики/ }).click();
+  await expect.poll(() => sockets.length).toBe(1);
+  sockets[0].send(JSON.stringify({ positions: [{ id: 101, deviceId: 1, serverTime: '2026-09-20T10:01:00Z', attributes: { adc1: 700, ignition: false } }, { id: 999, deviceId: 999, attributes: { secret: 42 } }] }));
+  const analysis = modal.getByRole('region', { name: 'Анализ входящих данных' });
+  await expect(analysis.getByRole('row').filter({ hasText: 'adc1' })).toContainText('700');
+  await expect(analysis).not.toContainText('secret');
+  await analysis.getByRole('row').filter({ hasText: 'adc1' }).getByRole('button', { name: 'Создать датчик' }).click();
+  await modal.getByLabel('Название датчика').fill('Мой датчик');
+  sockets[0].send(JSON.stringify({ positions: [{ id: 102, deviceId: 1, serverTime: '2026-09-20T10:01:05Z', attributes: { adc1: 800, temp1: 20 } }] }));
+  await expect(modal.getByLabel('Название датчика')).toHaveValue('Мой датчик');
+  await expect(analysis.getByRole('row').filter({ hasText: 'ignition' })).toContainText('Не пришёл в последнем сообщении');
+  await expect(analysis.getByRole('row').filter({ hasText: 'temp1' })).toContainText('20');
+  await expect(modal.getByText('Последнее значение: 800', { exact: true })).toBeVisible();
+  await page.screenshot({ path: 'test-results/live-parameters.png', fullPage: true });
+  sockets[0].close();
+  await expect(analysis).toContainText('опрос каждые 5 секунд');
+  await expect.poll(() => sockets.length, { timeout: 10000 }).toBe(2);
+  sockets[1].send(JSON.stringify({ positions: [{ id: 103, deviceId: 1, serverTime: '2026-09-20T10:01:10Z', attributes: { adc1: 900 } }] }));
+  await expect(modal.getByText('Последнее значение: 900', { exact: true })).toBeVisible();
+  await expect(modal.getByLabel('Название датчика')).toHaveValue('Мой датчик');
 });

@@ -15,3 +15,9 @@
 .sensor-card input[type="checkbox"] { width:auto; align-self:flex-start; }
 .manage-dialog .dialog-heading { position:sticky; top:-24px; background:white; z-index:2; padding:12px 0; }
 .manage-dialog .form-actions { position:sticky; bottom:-24px; background:white; z-index:2; padding:12px 0; }
+
+.live-analysis { padding:14px; background:#f0f7f8; border-radius:8px; margin-bottom:16px; }
+.parameter-table { overflow:auto; max-height:330px; }
+.parameter-table table { width:100%; border-collapse:collapse; }
+.parameter-table td,.parameter-table th { padding:8px; border-bottom:1px solid #ccdfe4; text-align:left; max-width:240px; overflow-wrap:anywhere; }
+.parameter-table small { display:block; color:#58727c; margin-top:4px; }

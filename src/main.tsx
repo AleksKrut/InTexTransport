@@ -1,3 +1,4 @@
+import { useTelemetry } from './useTelemetry';
 import { useCallback, useEffect, useRef, useState, type FormEvent } from 'react';
 import { createRoot } from 'react-dom/client';
 import { api, ApiError, json } from './api';
@@ -59,7 +60,8 @@ function Dashboard({ user, config, server, onLogout, onBack }: { user: User; con
   const [from, setFrom] = useState(localInput(new Date(Date.now() - 3600000)));
   const [to, setTo] = useState(localInput(new Date()));
   const selectedDevice = devices.find(d => d.id === selected);
-  const position = positions.find(p => p.deviceId === selected);
+  const live = useTelemetry(selected ?? undefined);
+  const position = live.position ?? positions.find(p => p.deviceId === selected);
   const select = useCallback((id: number) => {
     routeRequest.current++; setRouteBusy(false); setSelected(id); setRoute(null); setRouteMessage('');
   }, []);
@@ -126,6 +128,7 @@ function Dashboard({ user, config, server, onLogout, onBack }: { user: User; con
             <div><span>Зажигание</span><strong>{position?.attributes.ignition === true ? 'Включено' : position?.attributes.ignition === false ? 'Выключено' : 'Нет данных'}</strong></div>
             <div><span>Время координат</span><strong>{formatTime(position?.fixTime)}</strong></div>
             <div><span>Последняя связь</span><strong>{formatTime(selectedDevice.lastUpdate)}</strong></div></div>
+          <p className="muted">{live.status}{live.error ? ` · ${live.error}` : ''}</p>
           <div className="telemetry">{sensorsFrom(selectedDevice.attributes?.intehSensors).filter(s => s.enabled).map(s => <div key={s.id}><span>{s.name}</span><strong>{sensorValue(s, position?.attributes)}</strong></div>)}</div>
           <form className="route-form" onSubmit={loadRoute}><label>Начало периода<input type="datetime-local" required value={from} onChange={e => setFrom(e.target.value)} /></label>
             <label>Конец периода<input type="datetime-local" required value={to} onChange={e => setTo(e.target.value)} /></label>

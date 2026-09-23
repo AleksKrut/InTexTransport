@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
 """Integration test. Run ONLY against a fresh disposable Compose installation."""
+import base64
+import hashlib
+import socket
+import ssl
+import struct
 import http.cookiejar
 import json
 import os
@@ -39,6 +44,51 @@ def must_deny(path, body=None):
     else:
         raise AssertionError("Anonymous access unexpectedly allowed: " + path)
 
+def live_socket():
+    """Verify the real nginx/session WebSocket path, not a mocked browser stream."""
+    url = urllib.parse.urlsplit(base)
+    stream = socket.create_connection((url.hostname, url.port or (443 if url.scheme == "https" else 80)), timeout=15)
+    if url.scheme == "https":
+        stream = ssl.create_default_context().wrap_socket(stream, server_hostname=url.hostname)
+    key = base64.b64encode(os.urandom(16)).decode()
+    cookie_request = urllib.request.Request(base + "/api/socket")
+    jar.add_cookie_header(cookie_request)
+    cookie = cookie_request.get_header("Cookie", "")
+    handshake = (f"GET /api/socket HTTP/1.1\r\nHost: {url.netloc}\r\n"
+        f"Upgrade: websocket\r\nConnection: Upgrade\r\nSec-WebSocket-Key: {key}\r\n"
+        f"Sec-WebSocket-Version: 13\r\nCookie: {cookie}\r\n\r\n")
+    stream.sendall(handshake.encode())
+    header = b""
+    while not header.endswith(b"\r\n\r\n"):
+        part = stream.recv(1)
+        if not part or len(header) > 16384:
+            raise AssertionError("WebSocket handshake incomplete")
+        header += part
+    assert b" 101 " in header.split(b"\r\n")[0], "WebSocket upgrade failed"
+    expected = base64.b64encode(hashlib.sha1((key + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()).digest())
+    assert expected in header, "Invalid WebSocket accept"
+    return stream
+
+def read_live(stream):
+    def exact(size):
+        value = b""
+        while len(value) < size:
+            chunk = stream.recv(size - len(value))
+            if not chunk:
+                raise AssertionError("WebSocket closed before telemetry arrived")
+            value += chunk
+        return value
+    first, second = exact(2)
+    length = second & 127
+    if length == 126:
+        length = struct.unpack("!H", exact(2))[0]
+    elif length == 127:
+        length = struct.unpack("!Q", exact(8))[0]
+    assert length < 1024 * 1024 and not second & 128, "Unexpected server frame"
+    payload = exact(length)
+    assert first & 15 != 8, "WebSocket closed"
+    return json.loads(payload) if first & 15 == 1 else {}
+
 server = request("/server")
 if not server["newServer"]:
     raise SystemExit("Refusing: this test requires a fresh, disposable database.")
@@ -53,6 +103,7 @@ must_deny("/devices")
 must_deny("/users", {"name": "Uninvited", "email": "no@example.invalid", "password": password})
 admin = request("/session", urllib.parse.urlencode({"email": email, "password": password}))
 assert admin["administrator"]
+live = live_socket()
 device = request("/devices", {"name": "CI test vehicle", "uniqueId": "ci-tracker-001"})
 start = datetime.now(timezone.utc) - timedelta(minutes=1)
 for index in range(3):
@@ -72,6 +123,18 @@ for attempt in range(20):
 assert len(route) == 3, route
 assert all(point["deviceId"] == device["id"] for point in route)
 assert abs(route[-1]["latitude"] - 56.8409) < 0.00001
+try:
+    deadline = time.monotonic() + 15
+    streamed = False
+    while time.monotonic() < deadline:
+        message = read_live(live)
+        if any(point["deviceId"] == device["id"] for point in message.get("positions", [])):
+            streamed = True
+            break
+    assert streamed, "Received positions were not delivered through WebSocket"
+finally:
+    live.close()
+
 hidden = request("/devices", {"name": "Other customer", "uniqueId": "ci-hidden-002"})
 customer_email = "ci-customer@example.invalid"
 customer = request("/users", {
