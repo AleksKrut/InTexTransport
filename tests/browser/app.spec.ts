@@ -83,7 +83,8 @@ test('manager creates and edits client and assigns vehicle in manager', async ({
   await modal.getByLabel('Название транспорта').fill('КамАЗ 01');
   await modal.getByLabel('Госномер', { exact: true }).fill('А001АА');
   await modal.getByLabel('IMEI / ID терминала').fill('860000000000001');
-  await modal.getByLabel('Модель терминала').fill('NAVTELECOM SMART');
+  await modal.getByLabel('Модель терминала', { exact: true }).selectOption('__manual__');
+  await modal.getByLabel('Название другой модели').fill('NAVTELECOM SMART');
   await modal.getByLabel('Протокол терминала').selectOption('egts');
   await modal.getByLabel('Клиент — назначить доступ').selectOption({ label: 'ООО Север' });
   await modal.getByRole('button', { name: 'Сохранить', exact: true }).click();
