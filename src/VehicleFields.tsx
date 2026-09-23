@@ -45,7 +45,7 @@ export function VehicleFields({ device }: { device?: Device }) {
         setModel(e.target.value);
         const entry = catalog?.models.find(m => m.name === e.target.value);
         if (entry) { setManufacturer(entry.manufacturer); setProtocol(entry.protocol); } else setProtocol('');
-      }}><option value="">Выберите модель</option>{catalog?.models.filter(m => !manufacturer || m.manufacturer === manufacturer).map(m => <option key={m.name + m.protocol} value={m.name}>{m.name}</option>)}<option value="__manual__">Другой терминал — указать вручную</option></select></label>
+      }}><option value="">Выберите модель</option>{catalog?.models.filter(m => !manufacturer || m.manufacturer === manufacturer).map(m => <option key={m.name + m.protocol} value={m.name}>{m.name}</option>)}<option value="__manual__">Другой терминал — указать вручную</option></select>{chosen && <small>Порт {chosen.port} / {chosen.transport.toUpperCase()} · {connection?.host || 'внешний адрес не задан'} · {enabled ? 'настроен' : 'приёмник не настроен / неизвестен'}</small>}</label>
       {model && !catalog?.models.some(m => m.name === model) && <label>Название другой модели<input value={model} maxLength={100} onChange={e => setModel(e.target.value)} /></label>}
       <label>Протокол терминала<select name="protocol" value={protocol} onChange={e => setProtocol(e.target.value)}><option value="">Выбрать позже</option>{catalog?.protocols.map(p => <option key={p.id} value={p.id}>{p.label}{p.id === 'navis' ? ' — NTCB / FLEX' : ''}</option>)}{protocol && !catalog?.protocols.some(p => p.id === protocol) && <option value={protocol}>{protocol}</option>}</select></label>
       <label>SIM / телефон терминала<input name="phone" defaultValue={device?.phone} maxLength={40} /></label>
